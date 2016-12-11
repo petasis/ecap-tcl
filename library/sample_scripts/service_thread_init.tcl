@@ -7,4 +7,4 @@ flush stdout
 source -encoding utf-8 \
   [file dirname [file dirname [info script]]]/ecap-tcl.tcl
 
-::ecap-tcl::HTMLProcessor create processor
+::ecap-tcl::SampleHTMLProcessor create processor

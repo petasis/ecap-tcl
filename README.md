@@ -90,7 +90,33 @@ ecap-tcl understands the following directives (in `squid.conf`):
 
 ### The [library file](library/ecap-tcl.tcl.in): ecap-tcl.tcl
 
-Explain what these tests test and why
+The library file **is not automatically loaded** when the ecap-tcl adapter is loaded into the host application. It must be **explicitely loaded** by the Squid configuration (i.e. loaded by one of the scripts specified).
+
+In the provided sample scripts, it is loaded by the [library/sample_scripts/service_thread_init.tcl](library/sample_scripts/service_thread_init.tcl) script.
+
+#### What is needed from the library file?
+
+The ecap-tcl adapter, will receive 5 event types from the host application, and will call 5 Tcl commands to process them. These commands and their parameters are:
+
+* `::ecap-tcl::wantsUrl <url>` - This command will be called to decide whether the request with this `url` is wanted. The command must respond with `true` or `false`. In case of an error, or if the command does not exist, `true` is assumed. No other information beyond the <url> is available.
+
+* `::ecap-tcl::actionStart <token>` - This command will be called to notify that the processing for this `token` will start. Usually, this command will initialise a state for this `token`. (`token` is an identifier for a specific request done on the host application.)
+
+* `::ecap-tcl::contentAdapt <token> <chunk>` - This command will be called to process a **piece** of the content, from the body of the message retrieved by the host application, in order to fulfil the request). This command is expected to return the modified version of the `chunk`. This command may accumulate all chunks (i.e. by appending them to a Tcl variable). In such a case, it can return `{}`, so nothing is returned to the host application.
+
+* `::ecap-tcl::contentDone <token> <atEnd>` - This command will be called after all chunks have been processed with `::ecap-tcl::contentAdapt`. The return value of this command will be returned to the host application as content. If chunks have been accumulated, the adapted content can be returned by this command. It will be appended to the content returned by the `::ecap-tcl::contentAdapt` calls.
+
+* `::ecap-tcl::actionStop <token>` - This command will be called to signal that processing of the message represented by `token` has been finished, and allocated resources must be freed.
+
+These are the 5 commands that are expected by the ecap-tcl adapter.
+During the execution of the last 4 commands, the command `::ecap-tcl::action` will be available, which can be used to request/modify/remove headers of the request message.
+
+#### What else is defined in the library file?
+
+A number of TclOO classes, to facilitate usage. This library section is oriented towards processing textual content, with the main class being `::ecap-tcl::TextProcessor`. This class will accumulate all chunks (in the variable `content_uncompressed`), and in case of compressed content, it will be decompressed first. (The original content as received is always available in the variable `content_action`.) This class can be sub-classed, to easily adapt content.
+
+An example is class ::ecap-tcl::SampleHTMLProcessor.
+
 
 ```
 Give an example

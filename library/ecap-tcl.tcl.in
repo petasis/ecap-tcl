@@ -114,8 +114,8 @@ namespace eval ::ecap-tcl {
 
 ############################################################################
 ## The following classes define a set of processors.
-## ::ecap-tcl::HTMLProcessor is such an example. In order to play with it,
-## simply create an instance of the ::ecap-tcl::HTMLProcessor class.
+## ::ecap-tcl::SampleHTMLProcessor is such an example. In order to play with it,
+## simply create an instance of the ::ecap-tcl::SampleHTMLProcessor class.
 ############################################################################
 
 oo::class create ::ecap-tcl::AbstractProcessor {
@@ -275,7 +275,7 @@ oo::class create ::ecap-tcl::TextProcessor {
 
 };# class ::ecap-tcl::TextProcessor
 
-oo::class create ::ecap-tcl::HTMLProcessor {
+oo::class create ::ecap-tcl::SampleHTMLProcessor {
   superclass ::ecap-tcl::TextProcessor
 
   method mime-types {} {
@@ -293,9 +293,9 @@ oo::class create ::ecap-tcl::HTMLProcessor {
     dict get $content_action $token
   };# processContent
 
-};# class ::ecap-tcl::HTMLProcessor
+};# class ::ecap-tcl::SampleHTMLProcessor
 
 package provide ecap-tcl @PACKAGE_VERSION@
 
 ## Test:
-#  ::ecap-tcl::HTMLProcessor create processor
+#  ::ecap-tcl::SampleHTMLProcessor create processor
