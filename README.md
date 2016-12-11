@@ -115,24 +115,34 @@ During the execution of the last 4 commands, the command `::ecap-tcl::action` wi
 
 A number of TclOO classes, to facilitate usage. This library section is oriented towards processing textual content, with the main class being `::ecap-tcl::TextProcessor`. This class will accumulate all chunks (in the variable `content_uncompressed`), and in case of compressed content, it will be decompressed first. (The original content as received is always available in the variable `content_action`.) This class can be sub-classed, to easily adapt content.
 
-An example is class ::ecap-tcl::SampleHTMLProcessor.
-
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
+An example is class ::ecap-tcl::SampleHTMLProcessor. It is called when the mime type is `text/html`, and in its content adaptation method (`processContent`), it adds the `X-Ecap` header, it prints all message headers (after the addition), it prints the message url, the token, and the first 30 characters of the message body. It returns the unmodified, original message body back.
 
 ```
-Give an example
+oo::class create ::ecap-tcl::SampleHTMLProcessor {
+  superclass ::ecap-tcl::TextProcessor
+
+  method mime-types {} {
+    return {text/html}
+  };# mime-types
+
+  method processContent {token mime params} {
+    my variable content_uncompressed content_action request_url
+    ::ecap-tcl::action header add X-Ecap \
+      [::ecap-tcl::action host uri]
+    my printHeaders
+    puts "URL: \"$request_url\""
+    puts "Token: $token, Data:\
+        \"[string range [dict get $content_uncompressed $token] 0 30]\"..."
+    dict get $content_action $token
+  };# processContent
+
+};# class ::ecap-tcl::SampleHTMLProcessor
 ```
 
-## Deployment
-
-Add additional notes about how to deploy this on a live system
+The script [library/sample_scripts/service_thread_init.tcl](library/sample_scripts/service_thread_init.tcl) simply enables it with:
+```
+::ecap-tcl::SampleHTMLProcessor create processor
+```
 
 ## Version
 
