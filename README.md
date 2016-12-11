@@ -14,7 +14,7 @@ Please note that this software has been tested only with [Squid](http://www.squi
 
 ### Prerequisites
 
-* [Tcl 8.6](http://www.tcl.tk/software/tcltk/8.6.html) - The Tcl language. Tcl 8.6+ may be available as a package in your Linux distribution. ecap-tcl has been tested with ActiveTcl 8.6.4. (Why is Tcl 8.6 required? The C/C++ part of the adapter has no specific requirements on the version. This requirement comes from the [library file](library/ecap-tcl.in), which uses TclOO, the `dict`, `try` and `lassign` commands.)
+* [Tcl 8.6](http://www.tcl.tk/software/tcltk/8.6.html) - The Tcl language. Tcl 8.6+ may be available as a package in your Linux distribution. ecap-tcl has been tested with ActiveTcl 8.6.4. (Why is Tcl 8.6 required? The C/C++ part of the adapter has no specific requirements on the version. This requirement comes from the [library file](library/ecap-tcl.tcl.in), which uses TclOO, the `dict`, `try` and `lassign` commands.)
 
 * [libecap 1.0.0](http://www.e-cap.org/Downloads) - The eCAP library. ecap-tcl has been tested with version 1.0.0 (it may work with either more recent or earlier versions). ecap-tcl has been based on the adapter sample version 1.0.0. Some Linux distributions may have this library as a package:
   * Fedora 24: dnf install libecap-devel
@@ -88,7 +88,7 @@ ecap-tcl understands the following directives (in `squid.conf`):
 
 * `service_thread_retire_script`: expects a path to a Tcl script. If a thread pool will be used (`threads_number > 0`), this script will be called before a thread is terminated. (Right now the threads are not terminated and this script will never be called).
 
-### The [library file](library/ecap-tcl.in): ecap-tcl.tcl
+### The [library file](library/ecap-tcl.tcl.in): ecap-tcl.tcl
 
 Explain what these tests test and why
 
