@@ -68,9 +68,13 @@ void Adapter::Service::configure(const libecap::Options &cfg) {
   cfg.visitEachOption(cfgtor);
 
   // check for post-configuration errors and inconsistencies
-  if (service_init_script.empty()) {
+  if (nthread == 0 && service_init_script.empty()) {
     throw libecap::TextException(CfgErrorPrefix +
-      "service_init_script is not set");
+      "no threads mode, service_init_script must be set");
+  }
+  if (nthread != 0 && service_thread_init_script.empty()) {
+    throw libecap::TextException(CfgErrorPrefix +
+      "threads mode, service_thread_init_script must be set");
   }
 }
 
