@@ -144,6 +144,25 @@ The script [library/sample_scripts/service_thread_init.tcl](library/sample_scrip
 ::ecap-tcl::SampleHTMLProcessor create processor
 ```
 
+A sample output, when the request to Squid is `http://www.google.gr` is:
+```
+ Date: "Sun, 11 Dec 2016 14:07:40 GMT"
+  Expires: "-1"
+  Cache-Control: "private, max-age=0"
+  Content-Type: "text/html; charset=ISO-8859-7"
+  P3P: "CP="This is not a P3P policy! See https://www.google.com/support/accounts/answer/151657?hl=en for more info.""
+  Server: "gws"
+  X-XSS-Protection: "1; mode=block"
+  X-Frame-Options: "SAMEORIGIN"
+  Set-Cookie: "NID=91=QgZYLsGxxNYYq4QLqh1yIoCU-uj22C3tBoNWkFqFuFPru6NlsqJv2i7R0_wDwyAG9opD_SgKu9_8Wg5diTO8Yk33oaMAvfpaNsM1x_1TxSMKX2Mi_BUXYB94Po_UE5DO; expires=Mon, 12-Jun-2017 14:07:40 GMT; path=/; domain=.google.gr; HttpOnly"
+  Accept-Ranges: "none"
+  Vary: "Accept-Encoding"
+  Transfer-Encoding: "chunked"
+  X-Ecap: "ecap://squid-cache.org/ecap/hosts/squid"
+URL: "/"
+Token: _d0f9267b29560000_, Data: "<!doctype html><html itemscope="...
+```
+
 ## Version
 
 The current version of ecap-tcl is: 0.1 (beta)
