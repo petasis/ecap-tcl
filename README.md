@@ -146,7 +146,7 @@ The script [library/sample_scripts/service_thread_init.tcl](library/sample_scrip
 
 A sample output, when the request to Squid is `http://www.google.gr` is:
 ```
- Date: "Sun, 11 Dec 2016 14:07:40 GMT"
+  Date: "Sun, 11 Dec 2016 14:07:40 GMT"
   Expires: "-1"
   Cache-Control: "private, max-age=0"
   Content-Type: "text/html; charset=ISO-8859-7"
