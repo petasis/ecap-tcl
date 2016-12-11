@@ -72,9 +72,6 @@ void Adapter::Service::configure(const libecap::Options &cfg) {
     throw libecap::TextException(CfgErrorPrefix +
       "service_init_script is not set");
   }
-  if (victim.empty()) {
-    throw libecap::TextException(CfgErrorPrefix + "victim value is not set");
-  }
 }
 
 void Adapter::Service::reconfigure(const libecap::Options &cfg) {
@@ -87,8 +84,6 @@ void Adapter::Service::reconfigure(const libecap::Options &cfg) {
   threads_number.clear();
   nthread = 0;
   freePool();
-  victim.clear();
-  replacement.clear();
   configure(cfg);
 }
 
@@ -108,10 +103,6 @@ void Adapter::Service::setOne(const libecap::Name &name, const libecap::Area &va
     service_thread_retire_script = value;
   } else if (name == "threads_number") {
     setThreadsNumber(value);
-  } else if (name == "victim") {
-    setVictim(value);
-  } else if (name == "replacement") {
-    replacement = value; // no checks needed, even an empty value is OK
   } else if (name.assignedHostId()) {
     // skip host-standard options we do not know or care about
   } else {
@@ -165,14 +156,6 @@ void Adapter::Service::initPool(void) {
                            (void *) service_thread_init_script.c_str());
     TPoolThreadWait(t);
   }
-}
-
-void Adapter::Service::setVictim(const std::string &value) {
-  if (value.empty()) {
-    throw libecap::TextException(CfgErrorPrefix +
-      "empty victim value is not allowed");
-  }
-  victim = value;
 }
 
 void Adapter::Service::evalScript(const std::string &path) {

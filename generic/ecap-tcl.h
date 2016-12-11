@@ -69,9 +69,6 @@ class Service: public libecap::adapter::Service {
     std::string service_thread_init_script;
     std::string service_thread_retire_script;
     std::string threads_number;
-    std::string victim;        // the text we want to replace
-    std::string replacement;   // what the replace the victim with
-
 
     int  actionStart(Xaction *action) const;
     int  actionStop(Xaction *action) const;
@@ -83,7 +80,6 @@ class Service: public libecap::adapter::Service {
     void setThreadsNumber(const std::string &value);
     void initPool(void);
     void freePool(void);
-    void setVictim(const std::string &value);
     void evalScript(const std::string &path);
   private:
     unsigned int nthread = 0;   // Number of threads
