@@ -168,6 +168,11 @@ oo::class create ::ecap-tcl::AbstractProcessor {
     flush $channel
   };# printHeaders
 
+  method setContentLength {data} {
+    ::ecap-tcl::action header add Content-Length [string length $data]
+    return $data
+  };# setContentLength
+
 };# ::ecap-tcl::AbstractProcessor
 
 oo::class create ::ecap-tcl::ContentProcessor {
@@ -250,6 +255,25 @@ oo::class create ::ecap-tcl::UncompressProcessor {
     }
   };# uncompressContent
 
+  method compressContent {bindata {method gzip}} {
+    switch -- $method {
+      gzip {
+        ::ecap-tcl::action header add Content-Encoding gzip
+        set data [zlib gzip $bindata]
+      }
+      deflate {
+        ::ecap-tcl::action header add Content-Encoding deflate
+        set data [zlib deflate $bindata]
+      }
+      no {
+        ::ecap-tcl::action header remove Content-Encoding
+        set data $bindata
+      }
+      default {error "unsopported compression method \"$method\""}
+    }
+    my setContentLength $data
+  };# compressContent
+
 };# class ::ecap-tcl::UncompressProcessor
 
 oo::class create ::ecap-tcl::TextProcessor {
@@ -257,21 +281,26 @@ oo::class create ::ecap-tcl::TextProcessor {
 
   method uncompressContent {token mime params} {
     next $token $mime $params
-    ## Convert the data to utf-8, from the specified encoding
-    set encoding iso8859-1
+    my variable content_encoding content_uncompressed
+    ## Convert the data to utf-8, from the specified content_encoding
+    set content_encoding iso8859-1
     set params [split [string map {{ } {}} [string tolower $params]] =]
     if {[dict exists $params charset]} {
-      set iata_encoding [string map {iso-8859 iso8859} \
+      set iata_content_encoding [string map {iso-8859 iso8859} \
                            [dict get $params charset]]
-      switch -- $iata_encoding {
-        default {set encoding $iata_encoding}
+      switch -- $iata_content_encoding {
+        default {set content_encoding $iata_content_encoding}
       }
     }
-    my variable content_uncompressed
     dict set content_uncompressed $token \
-        [encoding convertfrom $encoding \
+        [encoding convertfrom $content_encoding \
              [dict get $content_uncompressed $token]]
   };# uncompressContent
+
+  method compressContent {data {method gzip}} {
+    my variable content_encoding
+    next [encoding convertto $content_encoding $data] $method
+  };# compressContent
 
 };# class ::ecap-tcl::TextProcessor
 
