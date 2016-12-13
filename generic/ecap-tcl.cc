@@ -25,7 +25,7 @@ namespace Adapter { // not required, but adds clarity
  * gets initialised. */
   static bool              TclInitialized = false;
   static Tcl_Interp           *mainInterp = NULL;
-  static const Tcl_ObjType *bytearrayType = NULL;
+  const Tcl_ObjType        *bytearrayType = NULL;
 
 // Calls Service::setOne() for each host-provided configuration option.
 // See Service::configure().
@@ -249,8 +249,10 @@ void Adapter::evalInThread(Tcl_Interp *interp, void *clientdata) {
         // Get its type...
         if (result->typePtr == bytearrayType) {
           str = (const char*) Tcl_GetByteArrayFromObj(result, &len);
+          //printf("%s Got a byte array (%d)\n", Tcl_GetString(objv[0]), len);
         } else {
           str = Tcl_GetStringFromObj(result, &len);
+          //printf("%s Got a string (%d)\n", Tcl_GetString(objv[0]), len);
         }
         data->result.assign(str, len);
         break;
@@ -497,6 +499,10 @@ void Adapter::Xaction::visitEachOption(libecap::NamedValueVisitor &) const {
 }
 
 libecap::host::Xaction *Adapter::Xaction::host() const {return hostx;}
+libecap::Message &Adapter::Xaction::adapted() const {
+  Must(adaptedx != 0);
+  return *adaptedx;
+}
 
 void Adapter::Xaction::start() {
   Must(hostx);
@@ -510,8 +516,9 @@ void Adapter::Xaction::start() {
 
   /* adapt message header */
 
-  libecap::shared_ptr<libecap::Message> adapted = hostx->virgin().clone();
-  Must(adapted != 0);
+  // libecap::shared_ptr<libecap::Message> adapted = hostx->virgin().clone();
+  adaptedx = hostx->virgin().clone();
+  Must(adaptedx != 0);
 
   // delete ContentLength header because we may change the length
   // unknown length may have performance implications for the host
@@ -523,11 +530,11 @@ void Adapter::Xaction::start() {
   //   libecap::Area::FromTempString(libecap::MyHost().uri());
   // adapted->header().add(name, value);
 
-  if (!adapted->body()) {
+  if (!adaptedx->body()) {
     sendingAb = opNever; // there is nothing to send
-    lastHostCall()->useAdapted(adapted);
+    lastHostCall()->useAdapted(adaptedx);
   } else {
-    hostx->useAdapted(adapted);
+    // hostx->useAdapted(adaptedx);
     tcl_action_start = true;
     packVoidPtr(token, (void *) this, "_", ACTION_TOKEN_SIZE);
     if (service->actionStart(this) != TCL_OK) {
@@ -589,6 +596,7 @@ void Adapter::Xaction::noteVbContentDone(bool atEnd) {
   Must(receivingVb == opOn);
   std::string chunk;
   service->contentDone(this, atEnd, chunk);
+  hostx->useAdapted(adaptedx);
   if (chunk.size()) {
     buffer += chunk; // buffer what we got
     if (sendingAb == opOn)

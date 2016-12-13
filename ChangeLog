@@ -1,5 +1,21 @@
+2016-12-13  Georgios Petasis  <petasis@iit.demokritos.gr>
+
+  * [Release]: Released ecap-tcl v0.2
+
+  * generic/cmds.h:
+  * generic/cmds.cc: New command (action content bytelength). Changed "action
+  header add/set" to remove any previously defined header with the same name
+  before adding a new one.
+
+  * generic/ecap-tcl.h:
+  * generic/ecap-tcl.cc: hast->usAadapted() is called in noteVbContentDone(),
+  so as headers can be modified by "contentDone". Modifications to the headers
+  done by "actionStop" will be lost.
+
+  * library/ecap-tcl.tcl.in: Various fixes in the library.
+
 2016-12-11  Georgios Petasis  <petasis@iit.demokritos.gr>
 
-	* Initial import to GitHub.
-	* First beta version (v 0.1)
+  * Initial import to GitHub.
+  * First beta version (v 0.1)
 

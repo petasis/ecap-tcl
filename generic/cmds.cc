@@ -1,5 +1,9 @@
 #include "ecap-tcl.h"
 
+namespace Adapter {
+extern const Tcl_ObjType *bytearrayType;
+}
+
 class ValuesToDict: public libecap::NamedValueVisitor {
   public:
     ValuesToDict(Tcl_Interp *i, Tcl_Obj *obj): interp(i), object(obj) {}
@@ -33,6 +37,8 @@ int TcleCAP_InitialiseInterpreter(Tcl_Interp *interp) {
                        TcleCAP_ActionHeaderCmd , NULL, NULL);
   Tcl_CreateObjCommand(interp, "::ecap-tcl::action::host",
                        TcleCAP_ActionHostCmd , NULL, NULL);
+  Tcl_CreateObjCommand(interp, "::ecap-tcl::action::content",
+                       TcleCAP_ActionContentCmd , NULL, NULL);
 
   /* Create the ensemble ::ecap-tcl::action */
   Tcl_CreateEnsemble(interp, "::ecap-tcl::action", action, 0);
@@ -88,7 +94,8 @@ int TcleCAP_ActionHeaderCmd(ClientData clientData, Tcl_Interp *interp,
         const libecap::Name name(Tcl_GetString(objv[i]));
         const libecap::Header::Value value =
           libecap::Area::FromTempString(Tcl_GetString(objv[i+1]));
-        action->host()->adapted().header().add(name, value);
+        action->/*host()->*/adapted().header().removeAny(name);
+        action->/*host()->*/adapted().header().add(name, value);
       }
       break;
     }
@@ -98,7 +105,7 @@ int TcleCAP_ActionHeaderCmd(ClientData clientData, Tcl_Interp *interp,
         Tcl_WrongNumArgs(interp, 1, objv, "name");
         return TCL_ERROR;
       }
-      if (action->host()->adapted().header().hasAny(name)) {
+      if (action->/*host()->*/adapted().header().hasAny(name)) {
         Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
       } else {
         Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
@@ -113,16 +120,16 @@ int TcleCAP_ActionHeaderCmd(ClientData clientData, Tcl_Interp *interp,
       if (objc == 2) {
         // Visit all nodes...
         ValuesToDict visitor(interp, Tcl_NewDictObj());
-        action->host()->adapted().header().visitEach(visitor);
+        action->/*host()->*/adapted().header().visitEach(visitor);
         Tcl_SetObjResult(interp, visitor.object);
       } else {
         // Get a specific header, if exists...
         const libecap::Name name(Tcl_GetString(objv[2]));
-        if (!action->host()->adapted().header().hasAny(name)) {
+        if (!action->/*host()->*/adapted().header().hasAny(name)) {
           Tcl_ResetResult(interp);
         } else {
           const libecap::Area value =
-                              action->host()->adapted().header().value(name);
+                action->/*host()->*/adapted().header().value(name);
           Tcl_SetObjResult(interp,
               Tcl_NewStringObj((char *) value.start, value.size));
         }
@@ -136,7 +143,7 @@ int TcleCAP_ActionHeaderCmd(ClientData clientData, Tcl_Interp *interp,
       }
       for (i = 2; i < objc; i ++) {
         const libecap::Name name(Tcl_GetString(objv[i]));
-        action->host()->adapted().header().removeAny(name);
+        action->/*host()->*/adapted().header().removeAny(name);
       }
       break;
     }
@@ -189,6 +196,44 @@ int TcleCAP_ActionHostCmd(ClientData clientData, Tcl_Interp *interp,
       }
       Tcl_SetObjResult(interp,
         Tcl_NewStringObj((char *) libecap::MyHost().uri().c_str(), -1));
+      break;
+  }
+  return TCL_OK;
+}
+
+int TcleCAP_ActionContentCmd(ClientData clientData, Tcl_Interp *interp,
+                          int objc, Tcl_Obj *const objv[]) {
+  int index, len = 0;
+
+  static const char *const optionStrings[] = {
+      "bytelength",
+      NULL
+  };
+  enum options {
+      CONTENT_BYTELENGTH
+  };
+
+  if (objc < 2) {
+    Tcl_WrongNumArgs(interp, 1, objv, "option ?arg ...?");
+    return TCL_ERROR;
+  }
+  if (Tcl_GetIndexFromObj(interp, objv[1], optionStrings, "option", 0,
+        &index) != TCL_OK) {
+    return TCL_ERROR;
+  }
+
+  switch ((enum options) index) {
+    case CONTENT_BYTELENGTH:
+      if (objc > 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "data");
+        return TCL_ERROR;
+      }
+      if (objv[2]->typePtr == Adapter::bytearrayType) {
+        Tcl_GetByteArrayFromObj(objv[2], &len);
+      } else {
+        Tcl_GetStringFromObj(objv[2], &len);
+      }
+      Tcl_SetObjResult(interp, Tcl_NewIntObj(len));
       break;
   }
   return TCL_OK;

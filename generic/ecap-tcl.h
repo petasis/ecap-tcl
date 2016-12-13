@@ -123,6 +123,7 @@ class Xaction: public libecap::adapter::Xaction {
     libecap::host::Xaction *host() const;
 
     char token[ACTION_TOKEN_SIZE];
+    libecap::Message &adapted() const;
 
   protected:
     void stopVb(); // stops receiving vb (if we are receiving it)
@@ -133,6 +134,7 @@ class Xaction: public libecap::adapter::Xaction {
     libecap::host::Xaction *hostx; // Host transaction rep
 
     std::string buffer; // for content adaptation
+    libecap::shared_ptr<libecap::Message> adaptedx;
 
     typedef enum { opUndecided, opOn, opComplete, opNever } OperationState;
     OperationState receivingVb;
