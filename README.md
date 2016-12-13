@@ -165,7 +165,7 @@ Token: _d0f9267b29560000_, Data: "<!doctype html><html itemscope="...
 
 ## Version
 
-The current version of ecap-tcl is: 0.2 (beta)
+The current version of ecap-tcl is: 0.2 (beta).
 This software is of beta quality. 
 
 ## Authors
@@ -180,4 +180,4 @@ This project is licensed under the BSD License - see the [license.terms](license
 
 ## Acknowledgments
 
-* Based on the [sample adapter](http://www.e-cap.org/Downloads) of the [eCAP library](http://www.e-cap.org/).
+* Based on the [sample adapter (adapter_modifying.cc)](http://www.e-cap.org/Downloads) of the [eCAP library](http://www.e-cap.org/).
