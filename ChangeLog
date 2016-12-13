@@ -8,7 +8,7 @@
   before adding a new one.
 
   * generic/ecap-tcl.h:
-  * generic/ecap-tcl.cc: host->usAadapted() is called in noteVbContentDone(),
+  * generic/ecap-tcl.cc: host->useAdapted() is called in noteVbContentDone(),
   so as headers can be modified by "contentDone". Modifications to the headers
   done by "actionStop" will be lost.
 
