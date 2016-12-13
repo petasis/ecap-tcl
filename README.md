@@ -165,7 +165,7 @@ Token: _d0f9267b29560000_, Data: "<!doctype html><html itemscope="...
 
 ## Version
 
-The current version of ecap-tcl is: 0.1 (beta)
+The current version of ecap-tcl is: 0.2 (beta)
 This software is of beta quality. 
 
 ## Authors
