@@ -180,4 +180,4 @@ This project is licensed under the BSD License - see the [license.terms](license
 
 ## Acknowledgments
 
-* Based on the [sample adapter (adapter_modifying.cc)](http://www.e-cap.org/Downloads) of the [eCAP library](http://www.e-cap.org/).
+* Based on the [sample adapter (adapter\_modifying.cc)](http://www.e-cap.org/Downloads) of the [eCAP library](http://www.e-cap.org/).
