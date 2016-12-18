@@ -1,5 +1,13 @@
 2016-12-13  Georgios Petasis  <petasis@iit.demokritos.gr>
 
+  * library/ecap-tcl.tcl
+  * library/ecap-tcl.tcl.in: Changed "headers add" to "headers set".
+
+  * generic/cmds.cc: Differentiate "headers set" from "headers add", with
+  "headers set" removing all previous headers with the same name.
+
+2016-12-13  Georgios Petasis  <petasis@iit.demokritos.gr>
+
   * [Release]: Released ecap-tcl v0.2
 
   * generic/cmds.h:
