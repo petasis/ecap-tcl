@@ -169,7 +169,7 @@ oo::class create ::ecap-tcl::AbstractProcessor {
   };# printHeaders
 
   method setContentLength {data} {
-    ::ecap-tcl::action header add Content-Length \
+    ::ecap-tcl::action header set Content-Length \
       [::ecap-tcl::action content bytelength $data]
     return $data
   };# setContentLength
@@ -269,12 +269,12 @@ oo::class create ::ecap-tcl::UncompressProcessor {
     switch -- $method {
       gzip {
         my variable content_compression_header
-        ::ecap-tcl::action header add Content-Encoding gzip
+        ::ecap-tcl::action header set Content-Encoding gzip
         set data [zlib gzip $bindata -header \
                        [dict get $content_compression_header $token]]
       }
       deflate {
-        ::ecap-tcl::action header add Content-Encoding deflate
+        ::ecap-tcl::action header set Content-Encoding deflate
         set data [zlib deflate $bindata]
       }
       no {

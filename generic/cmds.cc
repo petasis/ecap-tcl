@@ -94,7 +94,10 @@ int TcleCAP_ActionHeaderCmd(ClientData clientData, Tcl_Interp *interp,
         const libecap::Name name(Tcl_GetString(objv[i]));
         const libecap::Header::Value value =
           libecap::Area::FromTempString(Tcl_GetString(objv[i+1]));
-        action->/*host()->*/adapted().header().removeAny(name);
+        if ((enum options) index == HEADER_SET) {
+          // If the command is set, remove any other headers with the same name
+          action->/*host()->*/adapted().header().removeAny(name);
+        }
         action->/*host()->*/adapted().header().add(name, value);
       }
       break;
