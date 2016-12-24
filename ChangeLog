@@ -1,3 +1,9 @@
+2016-12-24  Georgios Petasis  <petasis@iit.demokritos.gr>
+
+  * library/ecap-tcl.tcl
+  * library/ecap-tcl.tcl.in: Changed the library code for wantsUrl, as
+  call_client_no_action is not working correctly for this case.
+
 2016-12-13  Georgios Petasis  <petasis@iit.demokritos.gr>
 
   * library/ecap-tcl.tcl

@@ -433,6 +433,7 @@ bool Adapter::Service::wantsUrl(const char *url) const {
   data.expects  = result_boolean;
   bool wanted = true;
 
+  // printf("wantsUrl:  %s\n", url);
   if (nthread && pool) {
     // Use the thread pool...
     if (thread) {
@@ -457,7 +458,7 @@ bool Adapter::Service::wantsUrl(const char *url) const {
       wanted = false;
       break;
   }
-  // printf("wantsUrl: %d (%d)\n", wanted ? 1 : 0, data.code);
+  // printf("  wantsUrl: %d (%d)\n", wanted ? 1 : 0, data.code);
   return wanted;
 }
 

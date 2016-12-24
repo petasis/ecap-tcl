@@ -62,6 +62,7 @@ namespace eval ::ecap-tcl {
       }
     };# call_client
 
+    ## NOT USED
     proc call_client_no_action {action args} {
       variable client_objects
       ## Iterate over all clients. If one wants it, return true...
@@ -73,7 +74,7 @@ namespace eval ::ecap-tcl {
         } on break {result options} {
           ## Proceed to the next client
         } on ok {result options} {
-          return -options $options $result
+          return $result
         } on error {result options} {
           # puts "Error: \"$result\""
           # puts "  $::errorInfo"
@@ -83,10 +84,20 @@ namespace eval ::ecap-tcl {
       return true
     };# call_client_no_action
 
+    proc wantsUrl {url} {
+      variable client_objects
+      ## Iterate over all clients. If one wants it, return true...
+      dict for {mime client} $client_objects {
+        if {[catch {$client onWantsUrl $url} result]} {continue}
+        if {$result} {return 1}
+      }
+      return 0
+    };# wantsUrl
+
   };# namespace tcloo
 
   proc wantsUrl {url} {
-    tcloo::call_client_no_action onWantsUrl $url
+    tcloo::wantsUrl $url
   };# wantsUrl
 
   proc actionStart {token} {
