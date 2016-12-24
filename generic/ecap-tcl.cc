@@ -518,6 +518,7 @@ void Adapter::Xaction::start() {
   /* adapt message header */
 
   // libecap::shared_ptr<libecap::Message> adapted = hostx->virgin().clone();
+  getUri();
   adaptedx = hostx->virgin().clone();
   Must(adaptedx != 0);
 
@@ -625,6 +626,16 @@ void Adapter::Xaction::noteVbContentAvailable() {
 
 bool Adapter::Xaction::callable() const {
   return hostx != 0; // no point to call us if we are done
+}
+
+void Adapter::Xaction::getUri() {
+  typedef const libecap::RequestLine *CLRLP;
+  if (!hostx) return;
+  if (CLRLP virginLine = dynamic_cast<CLRLP>(&hostx->virgin().firstLine()))
+      uri = virginLine->uri();
+  else
+  if (CLRLP causeLine = dynamic_cast<CLRLP>(&hostx->cause().firstLine()))
+      uri = causeLine->uri();
 }
 
 // tells the host that we are not interested in [more] vb

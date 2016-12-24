@@ -51,18 +51,25 @@ The ecap-tcl adapter will be installed in `/usr/local/lib/` as `/usr/local/lib/e
 #
 # eCAP
 #
-loadable_modules /usr/local/lib/ecap_adapter_tcl0.1/libecap_adapter_tcl0.1.so
+
+# Uncomment the following line to disable cache
+# cache deny all
+
 ecap_enable on
-ecap_service ecapModifier respmod_precache \
+loadable_modules /usr/local/lib/ecap_adapter_tcl0.2/libecap_adapter_tcl0.2.so
+ecap_service ecapTcl respmod_precache \
   uri=ecap://www.tcl.tk/ecap-tcl \
-  service_init_script=/usr/local/lib/ecap_adapter_tcl0.1/sample_scripts/service_init.tcl \
-  service_start_script=/usr/local/lib/ecap_adapter_tcl0.1/sample_scripts/service_start.tcl \
-  service_stop_script=/usr/local/lib/ecap_adapter_tcl0.1/sample_scripts/service_stop.tcl \
-  service_retire_script=/usr/local/lib/ecap_adapter_tcl0.1/sample_scripts/service_retire.tcl \
+  service_init_script=/usr/local/lib/ecap_adapter_tcl0.2/sample_scripts/service_init.tcl \
+  service_start_script=/usr/local/lib/ecap_adapter_tcl0.2/sample_scripts/service_start.tcl \
+  service_stop_script=/usr/local/lib/ecap_adapter_tcl0.2/sample_scripts/service_stop.tcl \
+  service_retire_script=/usr/local/lib/ecap_adapter_tcl0.2/sample_scripts/service_retire.tcl \
   threads_number=2 \
-  service_thread_init_script=/usr/local/lib/ecap_adapter_tcl0.1/sample_scripts/service_thread_init.tcl \
-  service_thread_retire_script=/usr/local/lib/ecap_adapter_tcl0.1/sample_scripts/service_thread_retire.tcl
-adaptation_access ecapModifier allow all
+  service_thread_init_script=/usr/local/lib/ecap_adapter_tcl0.2/sample_scripts/service_thread_init.tcl \
+  service_thread_retire_script=/usr/local/lib/ecap_adapter_tcl0.2/sample_scripts/service_thread_retire.tcl
+adaptation_access ecapTcl allow all
+# An example of how to limit application only to text/html:
+# acl HTMLPages rep_mime_type -i ^text/html
+# adaptation_access ecapTcl allow HTMLPages
 ```
 
 * Test the adapter in Squid - Run as root: (-N runs in no daemon mode)
@@ -166,7 +173,7 @@ Token: _d0f9267b29560000_, Data: "<!doctype html><html itemscope="...
 ## Version
 
 The current version of ecap-tcl is: 0.2 (beta).
-This software is of beta quality. 
+This software is of beta quality.
 
 ## Authors
 
@@ -180,4 +187,4 @@ This project is licensed under the BSD License - see the [license.terms](license
 
 ## Acknowledgments
 
-* Based on the [sample adapter (adapter\_modifying.cc)](http://www.e-cap.org/Downloads) of the [eCAP library](http://www.e-cap.org/).
+* Based on the [sample adapter (adapter\_modifying.cc)](http://www.e-cap.org/Downloads) of the [eCAP library](http://www.e-cap.org/). Information about eCAP is also available at: [eCAP launchpad](https://launchpad.net/ecap).

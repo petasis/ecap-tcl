@@ -121,6 +121,7 @@ class Xaction: public libecap::adapter::Xaction {
     virtual bool callable() const;
 
     libecap::host::Xaction *host() const;
+    void getUri();
 
     char token[ACTION_TOKEN_SIZE];
     libecap::Message &adapted() const;
@@ -132,6 +133,7 @@ class Xaction: public libecap::adapter::Xaction {
   private:
     libecap::shared_ptr<const Service> service; // configuration access
     libecap::host::Xaction *hostx; // Host transaction rep
+    libecap::Area uri;
 
     std::string buffer; // for content adaptation
     libecap::shared_ptr<libecap::Message> adaptedx;
