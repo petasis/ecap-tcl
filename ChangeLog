@@ -1,3 +1,9 @@
+2016-12-26  Georgios Petasis  <petasis@iit.demokritos.gr>
+
+  * library/ecap-tcl.tcl
+  * library/ecap-tcl.tcl.in: Changed :ecap-tcl::UncompressProcessor, now it
+  automatically restores the original compression of the data.
+
 2016-12-24  Georgios Petasis  <petasis@iit.demokritos.gr>
 
   * library/ecap-tcl.tcl

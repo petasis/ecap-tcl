@@ -255,8 +255,14 @@ oo::class create ::ecap-tcl::UncompressProcessor {
       my variable content_action
       return [dict get $content_action $token]
     }
-    my processContent $token $mime $params
+    my processContentAndCompress $token $mime $params
   };# onContentDone
+
+  method processContentAndCompress {token mime params} {
+    my variable content_is_compressed
+    my compressContent $token [my processContent $token $mime $params] \
+                                [dict get $content_is_compressed $token]
+  };# processContentAndCompress
 
   method uncompressContent {token mime params} {
     my variable content_is_compressed content_uncompressed \
