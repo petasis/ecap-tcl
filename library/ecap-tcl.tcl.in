@@ -88,8 +88,9 @@ namespace eval ::ecap-tcl {
       variable client_objects
       ## Iterate over all clients. If one wants it, return true...
       dict for {mime client} $client_objects {
-        if {[catch {$client onWantsUrl $url} result]} {continue}
-        if {$result} {return 1}
+        if {![catch {$client onWantsUrl $url} result] && $result} {
+          return 1
+        }
       }
       return 0
     };# wantsUrl
@@ -143,8 +144,6 @@ oo::class create ::ecap-tcl::AbstractProcessor {
   };# mime-types
 
   method onWantsUrl {url} {
-    my variable request_url
-    set request_url $url
     return true
   };# onWantsUrl
 
@@ -191,8 +190,9 @@ oo::class create ::ecap-tcl::ContentProcessor {
   superclass ::ecap-tcl::AbstractProcessor
 
   method onActionStart {token mime params} {
-    my variable content_action
+    my variable content_action request_uri
     dict set content_action $token {}
+    set request_uri [::ecap-tcl::action client request_uri]
   };# onActionStart
 
   method onActionStop {token mime params} {
@@ -349,11 +349,11 @@ oo::class create ::ecap-tcl::SampleHTMLProcessor {
   };# mime-types
 
   method processContent {token mime params} {
-    my variable content_uncompressed content_action request_url
+    my variable content_uncompressed content_action request_uri
     ::ecap-tcl::action header add X-Ecap \
       [::ecap-tcl::action host uri]
     my printHeaders
-    puts "URL: \"$request_url\""
+    puts "URL: \"$request_uri\""
     puts "Token: $token, Data:\
         \"[string range [dict get $content_uncompressed $token] 0 30]\"..."
     dict get $content_action $token

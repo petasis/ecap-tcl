@@ -45,25 +45,32 @@ static void initialiseThread(Tcl_Interp *interp, void *data);
 static void evalThreadScript(Tcl_Interp *interp, void *data);
 static void evalInThread(Tcl_Interp *interp, void *data);
 
-static const std::string CfgErrorPrefix =
-  "eCAP Tcl Adapter: configuration error: ";
-static const std::string ErrorPrefix =
-  "eCAP Tcl Adapter: error: ";
+static const std::string CfgErrorPrefix = ECAPTCL_ERROR_CONFIGURATION;
+static const std::string ErrorPrefix    = ECAPTCL_ERROR_PREFIX;
 } // namespace Adapter
 
+Adapter::Service::Service(const std::string &uri_suffix):
+    adapter_id_suffix(uri_suffix)
+{
+}
+
 std::string Adapter::Service::uri() const {
-  return "ecap://www.tcl.tk/ecap-tcl";
+  // printf("%s\n", __PRETTY_FUNCTION__); fflush(0);
+  return ECAPTCL_IDENTITY_URI + adapter_id_suffix;
 }
 
 std::string Adapter::Service::tag() const {
+  // printf("%s\n", __PRETTY_FUNCTION__); fflush(0);
   return PACKAGE_VERSION;
 }
 
 void Adapter::Service::describe(std::ostream &os) const {
-  os << "eCAP Tcl Adapter: " << PACKAGE_NAME << " v" << PACKAGE_VERSION;
+  // printf("%s\n", __PRETTY_FUNCTION__); fflush(0);
+  os << ECAPTCL_IDENTITY_DESCRIBE << PACKAGE_NAME << " v" << PACKAGE_VERSION;
 }
 
 void Adapter::Service::configure(const libecap::Options &cfg) {
+  // printf("%s\n", __PRETTY_FUNCTION__); fflush(0);
   Cfgtor cfgtor(*this);
   cfg.visitEachOption(cfgtor);
 
@@ -518,7 +525,7 @@ void Adapter::Xaction::start() {
   /* adapt message header */
 
   // libecap::shared_ptr<libecap::Message> adapted = hostx->virgin().clone();
-  getUri();
+  storeUri();
   adaptedx = hostx->virgin().clone();
   Must(adaptedx != 0);
 
@@ -628,7 +635,7 @@ bool Adapter::Xaction::callable() const {
   return hostx != 0; // no point to call us if we are done
 }
 
-void Adapter::Xaction::getUri() {
+void Adapter::Xaction::storeUri() {
   typedef const libecap::RequestLine *CLRLP;
   if (!hostx) return;
   if (CLRLP virginLine = dynamic_cast<CLRLP>(&hostx->virgin().firstLine()))
@@ -636,6 +643,10 @@ void Adapter::Xaction::getUri() {
   else
   if (CLRLP causeLine = dynamic_cast<CLRLP>(&hostx->cause().firstLine()))
       uri = causeLine->uri();
+}
+
+const libecap::Area Adapter::Xaction::getUri() const {
+  return uri;
 }
 
 // tells the host that we are not interested in [more] vb
@@ -662,10 +673,16 @@ libecap::host::Xaction *Adapter::Xaction::lastHostCall() {
 
 // create the adapter and register with libecap to reach the host application
 #if HAVE_ECAP_VERSION >= 100
-static const bool Registered =
-        libecap::RegisterVersionedService(new Adapter::Service);
+static bool Register(const std::string &suffix) {
+  return libecap::RegisterVersionedService(new Adapter::Service(suffix));
+}
+
+static const bool Registered = Register("");
 #else
-static const bool Registered = (libecap::RegisterService(new Adapter::Service), true);
+static bool Register(const std::string &suffix) {
+  return (libecap::RegisterService(new Adapter::Service(suffix)), true);
+}
+static const bool Registered = Register("");
 #endif
 
 char *Adapter::packData(char *c, void *ptr, size_t sz) {

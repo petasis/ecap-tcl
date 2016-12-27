@@ -39,6 +39,8 @@ int TcleCAP_InitialiseInterpreter(Tcl_Interp *interp) {
                        TcleCAP_ActionHostCmd , NULL, NULL);
   Tcl_CreateObjCommand(interp, "::ecap-tcl::action::content",
                        TcleCAP_ActionContentCmd , NULL, NULL);
+  Tcl_CreateObjCommand(interp, "::ecap-tcl::action::client",
+                       TcleCAP_ActionClientCmd , NULL, NULL);
 
   /* Create the ensemble ::ecap-tcl::action */
   Tcl_CreateEnsemble(interp, "::ecap-tcl::action", action, 0);
@@ -237,6 +239,52 @@ int TcleCAP_ActionContentCmd(ClientData clientData, Tcl_Interp *interp,
         Tcl_GetStringFromObj(objv[2], &len);
       }
       Tcl_SetObjResult(interp, Tcl_NewIntObj(len));
+      break;
+  }
+  return TCL_OK;
+}
+
+int TcleCAP_ActionClientCmd(ClientData clientData, Tcl_Interp *interp,
+                          int objc, Tcl_Obj *const objv[]) {
+  ClientData data;
+  Adapter::Xaction *action;
+  int index;
+
+  static const char *const optionStrings[] = {
+      "request_uri",
+      NULL
+  };
+  enum options {
+      CLIENT_REQUEST_URI
+  };
+
+  /* Get the action pointer from the interpreter... */
+  data = Tcl_GetAssocData(interp, TCLECAP_INTERP_KEY_ACTION, NULL);
+  action = (Adapter::Xaction *) data;
+  if (action->host() == NULL) {
+    Tcl_SetResult(interp, (char *) "called ouside an action context: "
+                          "no host pointer found", TCL_STATIC);
+    return TCL_ERROR;
+  }
+
+  if (objc < 2) {
+    Tcl_WrongNumArgs(interp, 1, objv, "option ?arg ...?");
+    return TCL_ERROR;
+  }
+  if (Tcl_GetIndexFromObj(interp, objv[1], optionStrings, "option", 0,
+        &index) != TCL_OK) {
+    return TCL_ERROR;
+  }
+
+  switch ((enum options) index) {
+    case CLIENT_REQUEST_URI:
+      if (objc > 2) {
+        Tcl_WrongNumArgs(interp, 2, objv, "");
+        return TCL_ERROR;
+      }
+      const libecap::Area value = action->getUri();
+      Tcl_SetObjResult(interp,
+              Tcl_NewStringObj((char *) value.start, value.size));
       break;
   }
   return TCL_OK;

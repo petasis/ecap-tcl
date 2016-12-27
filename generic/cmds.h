@@ -13,6 +13,8 @@ int TcleCAP_ActionHostCmd(ClientData clientData, Tcl_Interp *interp,
                           int objc, Tcl_Obj *const objv[]);
 int TcleCAP_ActionContentCmd(ClientData clientData, Tcl_Interp *interp,
                           int objc, Tcl_Obj *const objv[]);
+int TcleCAP_ActionClientCmd(ClientData clientData, Tcl_Interp *interp,
+                          int objc, Tcl_Obj *const objv[]);
 #ifdef __cplusplus
 }
 #endif

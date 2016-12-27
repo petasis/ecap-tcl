@@ -1,7 +1,31 @@
 2016-12-26  Georgios Petasis  <petasis@iit.demokritos.gr>
 
+  * configure.ac: Changed version to 0.3.
+
+  * generic/ecap-tcl.h:
+  * library/ecap-tcl.cc: Added the ability to register multiple versions of the
+  adapter, with different ids. Adapter::Service constructor now accepts a
+  suffix, which is appended at the end of ECAPTCL_IDENTITY_URI. The default
+  suffix (defined in ECAPTCL_IDENTITY_URI_SUFFIX) is the empty string.
+
+  * generic/ecap-tcl-identity.h: Moved various definitions that relate to the
+  identity of the eCAP adapter to a new file, which allows the redefinition of
+  the various strings at compilation (in case somebody wants to create an
+  adapter with a different identity).
+
   * library/ecap-tcl.tcl
-  * library/ecap-tcl.tcl.in: Changed :ecap-tcl::UncompressProcessor, now it
+  * library/ecap-tcl.tcl.in: Fixed a bug in wantsUrl. Moved storage of the uri
+  from onWantsUrl to onActionStart. The new command,
+  "::ecap-tcl::action client request_uri" is now used.
+
+  * generic/cmds.h:
+  * generic/cmds.cc: New command "::ecap-tcl::action client request_uri". It
+  returns the request uri.
+
+2016-12-26  Georgios Petasis  <petasis@iit.demokritos.gr>
+
+  * library/ecap-tcl.tcl
+  * library/ecap-tcl.tcl.in: Changed ::ecap-tcl::UncompressProcessor, now it
   automatically restores the original compression of the data.
 
 2016-12-24  Georgios Petasis  <petasis@iit.demokritos.gr>

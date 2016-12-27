@@ -19,6 +19,7 @@
 #include <tcl.h>
 #include "tpool.h"
 #include "cmds.h"
+#include "ecap-tcl-identity.h"
 
 //#if LIBECAP_VERSION == 1.0.0 || LIBECAP_VERSION == 1.0.1
 //  #define HAVE_ECAP_VERSION 100
@@ -35,6 +36,7 @@ class Xaction;
 
 class Service: public libecap::adapter::Service {
   public:
+    Service(const std::string &uri_suffix);
     // About
     virtual std::string uri() const; // unique across all vendors
     virtual std::string tag() const; // changes with version and config
@@ -62,6 +64,7 @@ class Service: public libecap::adapter::Service {
 
   public:
     // Configuration storage
+    const std::string adapter_id_suffix; // This is appended to the adapter URI
     std::string service_init_script;
     std::string service_start_script;
     std::string service_stop_script;
@@ -121,7 +124,8 @@ class Xaction: public libecap::adapter::Xaction {
     virtual bool callable() const;
 
     libecap::host::Xaction *host() const;
-    void getUri();
+    void storeUri();
+    const libecap::Area getUri() const;
 
     char token[ACTION_TOKEN_SIZE];
     libecap::Message &adapted() const;
