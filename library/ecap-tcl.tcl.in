@@ -8,7 +8,15 @@
 #############################################################################
 #############################################################################
 
+
 namespace eval ::ecap-tcl {
+
+  ## If the brotli package is available, use it...
+  catch {
+    package require brotli
+    set brotli [::brotli new]
+  }
+
   namespace eval tcloo {
     variable client_objects {}
 
@@ -229,6 +237,7 @@ oo::class create ::ecap-tcl::UncompressProcessor {
     if {[::ecap-tcl::action header exists Content-Encoding]} {
       switch -- [string tolower \
                   [::ecap-tcl::action header get Content-Encoding]] {
+        br      {dict set content_is_compressed $token br}
         gzip    {dict set content_is_compressed $token gzip}
         deflate {dict set content_is_compressed $token deflate}
         default {dict set content_is_compressed $token no}
@@ -271,6 +280,14 @@ oo::class create ::ecap-tcl::UncompressProcessor {
     set data [dict get $content_action $token]
     switch [dict get $content_is_compressed $token] {
       no      {dict set content_uncompressed $token $data}
+      br      {
+        if {[catch {
+          dict set content_uncompressed $token \
+                    [${::ecap-tcl::brotli} decompress $data]
+        }]} {
+          dict set content_uncompressed $token $data
+        }
+      }
       gzip    {
         dict set content_uncompressed $token \
                     [zlib gunzip $data -headerVar compression_header]
@@ -289,6 +306,14 @@ oo::class create ::ecap-tcl::UncompressProcessor {
         ::ecap-tcl::action header set Content-Encoding gzip
         set data [zlib gzip $bindata -header \
                        [dict get $content_compression_header $token]]
+      }
+      br {
+        if {[catch {${::ecap-tcl::brotli} compress $bindata} data]} {
+          ::ecap-tcl::action header set Content-Encoding deflate
+          set data [zlib deflate $bindata]
+        } else {
+          ::ecap-tcl::action header set Content-Encoding br
+        }
       }
       deflate {
         ::ecap-tcl::action header set Content-Encoding deflate
@@ -321,8 +346,9 @@ oo::class create ::ecap-tcl::TextProcessor {
     dict set content_encoding $token iso8859-1
     set params [split [string map {{ } {}} [string tolower $params]] =]
     if {[dict exists $params charset]} {
-      set iata_content_encoding [string map {iso-8859 iso8859} \
-                           [dict get $params charset]]
+      set iata_content_encoding [string map {
+        iso-8859 iso8859 windows-12 cp12
+      } [dict get $params charset]]
       switch -- $iata_content_encoding {
         default {dict set content_encoding $token $iata_content_encoding}
       }

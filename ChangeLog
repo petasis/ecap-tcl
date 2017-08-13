@@ -1,3 +1,9 @@
+2017-08-13  Georgios Petasis  <petasis@iit.demokritos.gr>
+
+  * library/ecap-tcl.tcl.in:
+  * library/ecap-tcl.tcl: Added support for the brotli encoding (if package
+  brotli is found: http://wiki.tcl.tk/48939).
+
 2016-12-26  Georgios Petasis  <petasis@iit.demokritos.gr>
 
   * configure.ac: Changed version to 0.3.
