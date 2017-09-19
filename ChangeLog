@@ -1,3 +1,9 @@
+2017-09-19  Georgios Petasis  <petasis@iit.demokritos.gr>
+
+  * generic/cmds.cc:
+  * generic/ecap-tcl.cc: Added support for the "proper" and "improper"
+  bytearray types that Tcl seems to use internally.
+
 2017-08-13  Georgios Petasis  <petasis@iit.demokritos.gr>
 
   * library/ecap-tcl.tcl.in:

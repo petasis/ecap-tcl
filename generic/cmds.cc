@@ -2,6 +2,7 @@
 
 namespace Adapter {
 extern const Tcl_ObjType *bytearrayType;
+extern const Tcl_ObjType *proper_bytearrayType;
 }
 
 class ValuesToDict: public libecap::NamedValueVisitor {
@@ -233,10 +234,18 @@ int TcleCAP_ActionContentCmd(ClientData clientData, Tcl_Interp *interp,
         Tcl_WrongNumArgs(interp, 2, objv, "data");
         return TCL_ERROR;
       }
-      if (objv[2]->typePtr == Adapter::bytearrayType) {
+      // printf("%p (%s)\n", objv[2]->typePtr, objv[2]->typePtr->name);
+      if (objv[2]->typePtr == Adapter::bytearrayType  ||
+          objv[2]->typePtr == Adapter::proper_bytearrayType) {
         Tcl_GetByteArrayFromObj(objv[2], &len);
+        // printf("%s Got a byte array (%d) (%p -> %s)\n",
+        //        Tcl_GetString(objv[1]), len, Adapter::bytearrayType,
+        //        Adapter::bytearrayType->name); fflush(0);
       } else {
         Tcl_GetStringFromObj(objv[2], &len);
+        // printf("%s Got a string (%d) (%p -> %s)\n",
+        //        Tcl_GetString(objv[1]), len, Adapter::bytearrayType,
+        //        Adapter::bytearrayType->name); fflush(0);
       }
       Tcl_SetObjResult(interp, Tcl_NewIntObj(len));
       break;

@@ -26,6 +26,7 @@ namespace Adapter { // not required, but adds clarity
   static bool              TclInitialized = false;
   static Tcl_Interp           *mainInterp = NULL;
   const Tcl_ObjType        *bytearrayType = NULL;
+  const Tcl_ObjType *proper_bytearrayType = NULL;
 
 // Calls Service::setOne() for each host-provided configuration option.
 // See Service::configure().
@@ -47,6 +48,22 @@ static void evalInThread(Tcl_Interp *interp, void *data);
 
 static const std::string CfgErrorPrefix = ECAPTCL_ERROR_CONFIGURATION;
 static const std::string ErrorPrefix    = ECAPTCL_ERROR_PREFIX;
+
+static std::string getErrorMsg(Tcl_Interp *interp, int code = TCL_ERROR) {
+  std::string msg(ErrorPrefix);
+  Tcl_Obj *options = Tcl_GetReturnOptions(interp, code);
+  Tcl_Obj *key = Tcl_NewStringObj("-errorinfo", -1);
+  Tcl_Obj *stackTrace;
+  Tcl_IncrRefCount(key);
+  Tcl_DictObjGet(NULL, options, key, &stackTrace);
+  Tcl_DecrRefCount(key);
+  Tcl_IncrRefCount(stackTrace);
+  msg += Tcl_GetString(stackTrace);
+  Tcl_DecrRefCount(stackTrace);
+  Tcl_DecrRefCount(options);
+  return msg;
+}; /* getErrorMsg */
+
 } // namespace Adapter
 
 Adapter::Service::Service(const std::string &uri_suffix):
@@ -184,7 +201,7 @@ void Adapter::initialiseThread(Tcl_Interp *interp, void *data) {
       "Tcl is not properly initialised");
   }
   if (TcleCAP_InitialiseInterpreter(interp) != TCL_OK) {
-    throw libecap::TextException(ErrorPrefix + Tcl_GetStringResult(interp));
+    throw libecap::TextException(ErrorPrefix + getErrorMsg(interp));
   }
 }
 
@@ -206,7 +223,7 @@ void Adapter::evalThreadScript(Tcl_Interp *interp, void *data) {
   Tcl_ResetResult(interp);
   code = Tcl_FSEvalFileEx(interp, value, "utf-8");
   if (code != TCL_OK) {
-    error = ErrorPrefix + Tcl_GetStringResult(interp);
+    error = getErrorMsg(interp, code);
   }
   if (interp == mainInterp) Tcl_MutexUnlock(&eCAPTcl);
   Tcl_DecrRefCount(value);
@@ -254,12 +271,15 @@ void Adapter::evalInThread(Tcl_Interp *interp, void *clientdata) {
     switch (data->expects) {
       case result_string: {
         // Get its type...
-        if (result->typePtr == bytearrayType) {
+        if (result->typePtr == bytearrayType ||
+            result->typePtr == proper_bytearrayType) {
           str = (const char*) Tcl_GetByteArrayFromObj(result, &len);
-          //printf("%s Got a byte array (%d)\n", Tcl_GetString(objv[0]), len);
+          // printf("%s Got a byte array (%d) (%p)\n", Tcl_GetString(objv[0]),
+          //        len, bytearrayType); fflush(0);
         } else {
           str = Tcl_GetStringFromObj(result, &len);
-          //printf("%s Got a string (%d)\n", Tcl_GetString(objv[0]), len);
+          // printf("%s Got a string (%d) (%p)\n", Tcl_GetString(objv[0]),
+          //        len, bytearrayType); fflush(0);
         }
         data->result.assign(str, len);
         break;
@@ -383,6 +403,7 @@ int Adapter::Service::contentDone(Xaction *action, bool atEnd,
 }
 
 void Adapter::Service::start() {
+  Tcl_Obj *byteArrayObject;
   int status;
   libecap::adapter::Service::start();
   // custom code would go here, but this service does not have one
@@ -395,10 +416,10 @@ void Adapter::Service::start() {
 
   /* Make sure we have a valid interpreter */
   if (mainInterp == NULL) {
-    Tcl_MutexLock(&eCAPTcl);
+    //Tcl_MutexLock(&eCAPTcl);
     Tcl_FindExecutable(NULL);
     mainInterp = Tcl_CreateInterp();
-    Tcl_MutexUnlock(&eCAPTcl);
+    //Tcl_MutexUnlock(&eCAPTcl);
   }
   if (mainInterp == NULL) {
     throw libecap::TextException("Cannot create a Tcl Interpreter");
@@ -409,10 +430,13 @@ void Adapter::Service::start() {
   status = Tcl_Init(mainInterp);
   if (status == TCL_ERROR) {
     Tcl_MutexUnlock(&eCAPTcl);
-    throw libecap::TextException(ErrorPrefix +
-      Tcl_GetStringResult(mainInterp));
+    throw libecap::TextException(getErrorMsg(mainInterp, status));
   }
   bytearrayType = Tcl_GetObjType("bytearray");
+  byteArrayObject = Tcl_NewObj();
+  Tcl_SetByteArrayObj(byteArrayObject, NULL, 0);
+  proper_bytearrayType = byteArrayObject->typePtr;
+  Tcl_DecrRefCount(byteArrayObject);
   TclInitialized = true;
   Tcl_MutexUnlock(&eCAPTcl);
   evalScript(service_init_script);
