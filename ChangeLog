@@ -1,3 +1,9 @@
+2018-09-29  Georgios Petasis  <petasis@iit.demokritos.gr>
+
+  * library/ecap-tcl.tcl.in:
+  * library/ecap-tcl.tcl: Added support for getting encoding from text
+  content, if such information is not present in HTTP headers.
+
 2017-09-19  Georgios Petasis  <petasis@iit.demokritos.gr>
 
   * generic/cmds.cc:

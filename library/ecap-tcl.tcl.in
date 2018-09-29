@@ -352,7 +352,20 @@ oo::class create ::ecap-tcl::TextProcessor {
       switch -- $iata_content_encoding {
         default {dict set content_encoding $token $iata_content_encoding}
       }
+    } else {
+      ## Maybe we can locate encoding in the content?
+      set match [regexp -nocase -inline {<meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s\"']*)?([^>]*?)[\s\"';]*charset\s*=[\s\"']*([^\s\"'/>]*)} [dict get $content_uncompressed $token]]
+      lassign $match _ type iata_content_encoding
+      if {$iata_content_encoding ne ""} {
+        set iata_content_encoding [string map {
+          iso-8859 iso8859 windows-12 cp12
+        } [string tolower $iata_content_encoding]]
+        switch -- $iata_content_encoding {
+          default {dict set content_encoding $token $iata_content_encoding}
+        }
+      }
     }
+    # puts "==>> [dict get $content_encoding $token]"
     dict set content_uncompressed $token \
         [encoding convertfrom [dict get $content_encoding $token] \
              [dict get $content_uncompressed $token]]
